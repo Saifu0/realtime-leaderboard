@@ -1,2 +1,1 @@
-# realtime-leaderboard
-Realtime scaled leaderboard system design
+# Realtime scaled leaderboard system design
