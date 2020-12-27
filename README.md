@@ -8,6 +8,10 @@
 4. The storage and querying is done through ElastiCache for Redis instead of through relational databases.
 5. Assuming there are N pools and every pools have some entry lets say 500,000. where, (1<=N<=100,000)
 6. Score can be same of different entries but entry ID must be unqiue.
+7. After creating new entry, it is being inserted into sorted set. But pools are not inserted into sorted set.
+8. Every pool is independent to each other i.e "Score Updator" update score of an entry in a pool independently. 
+9. Assuming, one entry takes 1 kilobyte of memory.
+10. Modern PC can take upto 10^8 operations per second.
 
 ### Flowchart
 ![alt text](https://github.com/Saifu0/realtime-leaderboard/blob/main/flowchart.png?raw=true)
@@ -33,4 +37,35 @@ come first on leaderboard which can be done by setting set "Score" field in asce
 
 In last, Redis send data to websockets and can be rendered on leaderboard screen. 
 
+### Pros of my design
+1. Frees up database resources for other types of requests.
+2. Redis offers one highly efficient and scalable solution.
+3. Due to sorted set, storage and querying is highly optimised. 
+4. Product APIs help in reducing load on database by making fewer requests.
+5. Local cache and distributed cache also helps in reducing load on database.
+6. Due to fast querying and storage, it can take a large number of requests in optimized way.
 
+### Cons of my design
+1. Too much traffic may break the design.
+2. We cannot handle too many pools of max limit entries (which is 500,000 in our case).
+
+### When my design will break
+Since every Pools are stored in a Database independently. It will take O(N) times to create only pools. And every pools have atmost 500,000 entries, lets denote
+it as 'E'. 
+
+now, each entry take O(logE) time to update or create.
+so for one pool, O(E*logE) time
+
+for N pools, O(N*E*logE) time.
+
+If N= 1millions pools is being created and E=500,000 entries is also created at the same time. Then it will take approx 96000 seconds. Which is too much.
+Once, Pools are created. It will take approx 0.09 second to update an entries. 
+
+So, 1 millions pools and 500,000 entries at the same time will take too much time and too much memory.
+
+### Overkill or not?
+When pools are 10 with 1000 entries in each, It would be better or preferable to use traditional relational database method.
+Typically, these include:
+    Create a table.
+    Insert or update scores as they change.
+    Query the table to retrieve the ranking by score in ascending order.
