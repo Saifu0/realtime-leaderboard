@@ -1,7 +1,7 @@
 # Realtime scaled leaderboard system design
 
 ### Flowchart
-![alt text]
+![alt text](https://github.com/Saifu0/realtime-leaderboard/blob/main/flowchart.png?raw=true)
 
 ### Assumptions
 
